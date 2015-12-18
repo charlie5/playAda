@@ -1,0 +1,124 @@
+with "../../library/gasp";
+with "shared";
+
+project Solo_Gasp is
+
+   for Object_Dir use "build";
+   for Exec_Dir use ".";
+   for Main use ("launch_solo_gasp.adb");
+   for Source_Dirs use (".");
+
+
+   type Restrictions is
+      ("xgc", "ravenscar");
+   Restrictions : Restrictions := external ("restrictions");
+   type Platform is
+      ("egl", "glx");
+   Opengl_Platform : Platform := external ("opengl_platform");
+   type Os_Type is
+      ("Windows_NT", "Linux", "MacOSX");
+   Os : Os_Type := external ("OS");
+   type Profile is
+      ("safe", "lean", "desk");
+   Opengl_Profile : Profile := external ("opengl_profile");
+
+   package Builder is
+
+      case Opengl_Platform is
+
+         when "egl" =>
+            for Default_Switches ("ada") use ("-g", "-j13");
+
+         when "glx" =>
+
+            case Restrictions is
+
+               when "xgc" =>
+
+                  case Os is
+
+                     when "Windows_NT" =>
+                        for Default_Switches ("ada") use ("-g", "-j13", "-O0");
+
+                     when "Linux" =>
+
+                        case Opengl_Profile is
+
+                           when "safe" =>
+                              for Default_Switches ("ada") use ("-g", "-j13", "-O0");
+
+                           when "lean" =>
+                              for Default_Switches ("ada") use ("-g", "-j13", "-O0", "-k");
+
+                           when "desk" =>
+                              for Default_Switches ("ada") use ("-g", "-j13", "-O0");
+                        end case;
+
+                     when "MacOSX" =>
+                        for Default_Switches ("ada") use ("-g", "-j13", "-O0");
+                  end case;
+
+               when "ravenscar" =>
+                  for Default_Switches ("ada") use ("-g", "-j13");
+            end case;
+      end case;
+   end Builder;
+
+   package Binder is
+      for Default_Switches ("ada") use ("-E");
+   end Binder;
+
+   package Compiler renames Shared.Compiler;
+
+   package Linker is
+
+      case Opengl_Platform is
+
+         when "egl" =>
+
+            case Restrictions is
+
+               when "xgc" =>
+                  for Default_Switches ("ada") use ("-L/usr/local/lib", "-lEGL", "-lGLESv2", "-lexpat", "-lX11", "-lX11-xcb", "-lxcb", "-lxcb-render", "-lxcb-glx", "-lfreetype", "-g");
+
+               when "ravenscar" =>
+                  for Default_Switches ("ada") use ("-lGL", "-lexpat", "-lX11", "-lgfortran", "-lxcb", "-lfreetype");
+            end case;
+
+         when "glx" =>
+
+            case Restrictions is
+
+               when "xgc" =>
+
+                  case Os is
+
+                     when "Windows_NT" =>
+                        for Default_Switches ("ada") use ("-lGL", "-lexpat", "-lX11", "-lX11-xcb", "-lxcb-render", "-lxcb-glx", "-lxcb", "-lfreetype", "-g", "-lstdc++");
+
+                     when "Linux" =>
+
+                        case Opengl_Profile is
+
+                           when "safe" =>
+                              for Default_Switches ("ada") use ("-lGL", "-lexpat", "-lX11", "-lX11-xcb", "-lxcb-render", "-lxcb-glx", "-lxcb", "-lfreetype", "-g", "-lstdc++");
+
+                           when "lean" =>
+                              for Default_Switches ("ada") use ("-lGL", "-lexpat", "-lX11", "-lfreetype", "-g", "-lstdc++");
+
+                           when "desk" =>
+                              for Default_Switches ("ada") use ("-lGL", "-lX11", "-lexpat", "-lm", "-g");
+                        end case;
+
+                     when "MacOSX" =>
+                        for Default_Switches ("ada") use ("-lGL", "-lexpat", "-lX11", "-lX11-xcb", "-lxcb-render", "-lxcb-glx", "-lxcb", "-lfreetype", "-g", "-lstdc++");
+                  end case;
+
+               when "ravenscar" =>
+                  for Default_Switches ("ada") use ("-lGL", "-lexpat", "-lX11", "-lgfortran", "-lxcb", "-lfreetype");
+            end case;
+      end case;
+   end Linker;
+
+end Solo_Gasp;
+

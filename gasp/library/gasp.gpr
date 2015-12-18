@@ -1,0 +1,24 @@
+with "lumen_mmi",
+     "shared";
+
+project Gasp is
+
+   for Source_Dirs use ("../source");
+   for Object_Dir use "build";
+
+   package Ide is
+      for Documentation_Dir use ".";
+   end Ide;
+
+   package Builder is
+      for Default_Switches ("ada") use ("-g");
+   end Builder;
+
+   package Compiler renames Shared.Compiler;
+
+   package Binder is
+      for Default_Switches ("ada") use ("-E");
+   end Binder;
+
+end Gasp;
+
